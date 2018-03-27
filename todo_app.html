@@ -13,10 +13,9 @@
     
     <style>
         body {
-            background-color: azure;
+            background-color: whitesmoke;
             padding: 10px;
         }
-        
         div.to_do {
             display: grid;
             grid-template-rows: 1fr 1fr auto 1fr 1fr;
@@ -25,7 +24,7 @@
         div#toolbar {
             grid-row: 2;
             grid-column: 2 / 4;
-            background-color: blue;
+            background-color: teal;
         }
         div#tasks_at_hand {
             grid-column: 3;
@@ -33,11 +32,10 @@
         }
         div#app_name {
             float: left;
-            padding: 15px;
             height: 100%;
             color: whitesmoke;
-            text-shadow: 3px 5px 6px azure;
-            font: bold italic 38px/32px Georgia, serif;
+            font-family: 'Mukta Mahee', sans-serif;
+            font-size: 28px;
         }
         div#active_tasks_label {
             font-family: 'Mukta Mahee', sans-serif;
@@ -45,7 +43,7 @@
             float: right;
             width: 25%;
             height: 100%;
-            background-color: yellow;
+            color: whitesmoke;
         }
         div#task_list_complete {
             width: 50%;
@@ -56,32 +54,31 @@
             float: left;
         }
         div#completed_tasks_label {
-            font-family: "Itim", cursive;
+            font-family: 'Mukta Mahee', sans-serif;
             font-size: 26px;
             float: right;
             width: 25%;
             height: 100%;
-            background-color: red;
+            color: whitesmoke;
         }
         div#new_task {
             grid-row: 3;
             grid-column: 2;
         }
         button.new_task_btn {
-            width: 240px;
-            height: 60px;
+            width: 60px;
+            height: 50px;
             border-radius: 10%;
-            border: 2px solid gold;
+            border: 2px groove black;
             box-sizing: border-box;
             font: bold normal 42px/48px Gothic, serif;
         }
         input#new_task_inpt {
             width: 300px;
             height: 44px;
-            border-style: none;
+            border: 2px solid #000;
             border-radius: 5%;
-            background-color: rgba(0, 0, 0, 0.7);
-            text-shadow: 4px 4px 4px gold;
+            background-color: white;
             font: bold normal 38px/36px Georgia, serif;
         }
         span.completed_tasks_txt, span.active_tasks_txt {
@@ -92,7 +89,6 @@
             text-decoration: line-through;
             opacity: 0.8;
         }
-        input.tasks {}
         #clear {
             clear: both;
         }
@@ -103,7 +99,7 @@
     <div class="to_do">
         <div id="toolbar">
             <div id="app_name">
-                <span id="an">Little TO-DO Application</span>
+                <h3>Little TO-DO Application</h3>
             </div>
             <div id="completed_tasks_label">
                  <h3>Completed tasks ({{ completed.length }})</h3>
@@ -133,8 +129,12 @@
         </div>
         <div id="new_task">
             <form id="task_form">
-                <input id="new_task_inpt" inpt type="text" id="new_task_input" name="new_task" ng-model="newtask" placeholder="Add new task">
+                <div style="display:inline-block;margin: auto;vertical-align:middle;">
+                <input id="new_task_inpt" inpt type="text" name="new_task" ng-model="newtask" placeholder="Add new task">
+                </div>
+                <div style="display:inline-block;margin:auto;vertical-align:middle;">
                 <button class="new_task_btn" type="submit" ng-click="add_task($event)">+</button>
+                </div>
             </form>
             <span ng-show="error" style="width: 100%;font: bold normal 32px/28px Gothic, serif; color:red;">{{ error }}</span>
         </div>
@@ -144,12 +144,12 @@
     <script>
         angular.module('littleToDoApp', [])
             .factory('toDoService', function($interval) {
-                var seen = {}
+                var seen = {"Do Math" : true, "Do Your Homework" : true}
             //Data from server --simulation
                 //Couple of starting tasks
                 var tasks = ["Do Math", "Do Your Homework"]
                 //Data from database
-                var random_tasks = ["Do the dishes", "Wash hands", "Go play", "Do your homework", "Clean yard", "Wash laundry", "Buy juice"]
+                var random_tasks = ["Do the dishes", "Wash hands", "Go play", "Do Math", "Buy Juice", "Do Your Homework", "Wash hands", "Clean yard", "clean yard", "Wash laundry", "Buy Juice"]
                 var index = 0
 
                 return {
@@ -173,26 +173,25 @@
                         start.splice(index, 1)
                     },
                     add_random_tasks : function(callback) {
+                    //Brute force
+                    //Try another aproach
                         var new_arr = []
+
                         for (var i = 0; i < random_tasks.length;i ++) {
                             if (!(random_tasks[i] in seen)) {
-                                seen[random_tasks[i]] = true            
-                            } else {
-                                seen[random_tasks[i]] ++
+                                seen[random_tasks[i]] = true
+                                new_arr.push(random_tasks[i])            
                             }
                         }
-                        for (var p in seen) {
-                            new_arr.push(p)
-                        }
-                        
+
                         var si = $interval(function() {
                             if (index == new_arr.length - 1) {                             
                                 $interval.cancel(si)
                             } 
+                               callback(tasks)
                                 tasks.push(new_arr[index])
                                  index ++
-                                    callback(tasks)
-                            }, 30000)                                   
+                            }, 500) //changing to 30000                                   
                     }
                 }
             })
@@ -231,19 +230,17 @@
         }])
         .directive('inpt', function() {
             return {
-                restrict : 'AEC',
+                restrict : 'AE',
                 link : function(scope, element, attrs) {
                     var str_arr = []
                     var str = ''
                     element.bind('keyup', function(e) {
                         str = e.target.value
                         if (!scope.validate_string(str)) {
-                            alert("input error")
                             scope.error = 'Bad input. Use capital letter for start'
                             scope.newtask = ''
                         } else {
-                            alert("input ok")
-                            scope.error = 'No error'
+                            scope.error = null
                         }
                     })
                 },
