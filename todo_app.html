@@ -146,9 +146,12 @@
             .factory('toDoService', function($interval) {
                 var seen = {}
             //Data from server --simulation
+                //Couple of starting tasks
                 var tasks = ["Do Math", "Do Your Homework"]
+                //Data from database
                 var random_tasks = ["Do the dishes", "Wash hands", "Go play", "Do your homework", "Clean yard", "Wash laundry", "Buy juice"]
                 var index = 0
+
                 return {
                     setTasks : function(value) {
                         tasks = value
@@ -209,6 +212,7 @@
             
             $scope.completed = []
             $scope.taskname = ''
+
             $scope.change = function(index, start, end) {
                 return toDoService.change(index, start, end)
             }
@@ -253,7 +257,7 @@
         })
 
     </script>
-    
+
 </body>
-    
+  
 </html>
