@@ -184,6 +184,7 @@
                                 return callback(new Error('You already have this task'))
                             } 
                         }
+                        seen[task_name] = true
                         tasks.push(task_name)
                         return callback(null, tasks)
                         }
