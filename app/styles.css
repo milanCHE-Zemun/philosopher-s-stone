@@ -36,12 +36,13 @@ div#active_tasks_label {
 }
 div#task_list_complete {
     width: 50%;
-    height: 100%;
+    height: 400px;
+    overflow: auto;
     float: right;
     color: gray;
 }
 div#task_list_active {
-    height: 100%;
+    height: 400px;
     width: 50%;
     float: left;
     overflow: auto;
