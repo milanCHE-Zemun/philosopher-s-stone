@@ -1,0 +1,320 @@
+<!Doctype HTML>
+
+<html ng-app="littleToDoApp">
+
+<head>
+     <title>Tasks App</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/angular.js/1.6.5/angular.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <link href="https://fonts.googleapis.com/css?family=Oswald" rel="stylesheet"> 
+    <link href="https://fonts.googleapis.com/css?family=Alegreya" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css?family=Mukta+Mahee" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css?family=Itim", rel="stylesheet">
+    
+    <style>
+        body {
+            background-color: whitesmoke;
+            padding: 10px;
+        }
+        div.to_do {
+            display: grid;
+            grid-template-rows: 1fr 1fr auto 1fr 1fr;
+            grid-template-columns: 1fr 2fr 2.5fr 2fr;
+        }
+        div#toolbar {
+            grid-row: 2;
+            grid-column: 2 / 4;
+            background-color: teal;
+            box-shadow: 2px 2px 4px 0 rgba(0, 0, 0, 0.4)
+        }
+        div#tasks_at_hand {
+            grid-column: 3 / 4;
+            grid-row: 3;
+        }
+        div#app_name {
+            float: left;
+            height: 100%;
+            width: 30%;
+            text-align: center;
+            color: whitesmoke;
+            font-family: 'Mukta Mahee', sans-serif;
+            font-size: 28px;
+        }
+        div#active_tasks_label {
+            font-family: 'Mukta Mahee', sans-serif;
+            font-size: 26px;
+            float: right;
+            width: 27.5%;
+            height: 100%;
+            color: whitesmoke;
+        }
+        div#task_list_complete {
+            width: 50%;
+            height: 100%;
+            float: right;
+            color: gray;
+        }
+        div#task_list_active {
+            height: 100%;
+            width: 50%;
+            float: left;
+            overflow: auto;
+            color: grey;
+        }
+        div#completed_tasks_label {
+            font-family: 'Mukta Mahee', sans-serif;
+            font-size: 26px;
+            float: right;
+            width: 27.5%;
+            height: 100%;
+            color: whitesmoke;
+        }
+        div#new_task {
+            grid-row: 3;
+            grid-column: 2;
+        }
+        button.new_task_btn {
+            width: 60px;
+            height: 50px;
+            border-radius: 10%;
+            border: 2px groove black;
+            box-sizing: border-box;
+            font: bold normal 42px/48px Gothic, serif;
+            color: grey;
+        }
+        input#new_task_inpt {
+            width: 300px;
+            height: 44px;
+            border: 2px solid #000;
+            border-radius: 5%;
+            background-color: white;
+            font: bold normal 28px/26px Georgia, serif;
+            color: grey;
+        }
+        span.completed_tasks_txt, span.active_tasks_txt {
+            font-family: 'Oswald', sans-serif;
+            font-size: 28px;
+        }
+        span.completed_tasks_txt {
+            text-decoration: line-through indianred double;
+            opacity: 0.8;
+        }
+        #clear {
+            clear: both;
+        }
+
+    </style>
+
+</head>
+<body ng-controller="ToDoController">
+    <div class="to_do">
+        <div id="toolbar">
+            <div id="app_name">
+                <h3>Little TO-DO Application</h3>
+            </div>
+            <div id="completed_tasks_label">
+                 <h3>Completed tasks ({{ completed.length }})</h3>
+            </div> 
+            <div id="active_tasks_label">
+                <h3>Active tasks ({{ tasks.length }})</h3>
+            </div>
+        </div>
+        
+        <div id="tasks_at_hand">
+            <div id="task_list_complete">
+                <div ng-show="completed.length">
+                    <div ng-repeat="task in completed">
+                        <input class="tasks_completed_checked" type="checkbox" ng-click="change($index, completed, tasks)" checked />
+                            <span class="completed_tasks_txt">{{ task }}</span><br />
+                    </div>
+                </div>
+            </div>
+        
+            <div id="task_list_active">
+                <span ng-hide="tasks.length" style="font: bold italic 26px/26px Gothic, serif">There are no tasks at the moment</span>
+                    <div ng-repeat="task in tasks">
+                        <input type="checkbox" class="tasks_active_checked" ng-click="change($index, tasks, completed)" />
+                            <span class="active_tasks_txt">{{ task }}</span> <br />
+                    </div>
+            </div>
+        </div>
+
+        <div id="new_task">
+            
+            <div class="inputs">
+                <div style="float: left";>
+                    <table>
+                        <tr>
+                             <td><input id="new_task_inpt" inpt type="text" name="new_task" ng-model="newtask" placeholder="add new task"></td>
+                             <td><button btn-plus class="new_task_btn" type="submit" ng-click="add_task($event)"><div class="plus_sign">+</div></button></td>
+                        </tr>
+                    </table>
+                    <span ng-show="error" style="width: 100%;font: bold normal 32px/28px Gothic, serif; color:red;">{{ error }}</span>
+                </div>
+            </div>
+        </div>
+
+    </div>
+<div id="clear"></div>  
+    
+    <script type="text/javascript">
+
+        angular.module('littleToDoApp', [])
+        //Service module with functions
+            .factory('toDoService', function($interval) {
+                var seen = {"do your homework" : true, "clean the house" : true, "wash your hands" : true}
+            //Data from server --simulation
+                //Some starting tasks
+                var tasks = ["Do Your Homework", "Clean the house", "Wash your hands"]
+                //Data from database
+                var random_tasks = ["Do the dishes", "Wash hands", "Go play", "Do Math", "Buy Juice", "Do Your Homework", "Wash hands", "Clean yard", "clean yard", "Wash laundry", "Buy Juice", "do the dishes"]
+                var index = 0
+
+                return {
+                    setTasks : function(value) {
+                        tasks = value
+                    },
+                    getTasks : function() {
+                        return tasks
+                    },
+                    addTask : function(task_name, callback) {
+                        if (task_name) {
+                        for (var prop in seen) {
+                            if (this.match_strings(prop, task_name)) {
+                                return callback(new Error('You already have this task'))
+                            } 
+                        }
+                        seen[task_name] = true
+                        tasks.push(task_name)
+                        return callback(null, tasks)
+                        }
+                    },
+                    change : function(index, start, end) {
+                        end.push(start[index])
+                        start.splice(index, 1)
+                    },
+                    add_random_tasks : function(callback) {
+                    //Brute force
+                    //Try another aproach
+                        var new_arr = []
+                        for (var i = 0; i < random_tasks.length;i ++) {
+                            if (this.validate_string(random_tasks[i]) && !(random_tasks[i].toLowerCase() in seen)) {
+                                seen[random_tasks[i].toLowerCase()] = true
+                                new_arr.push(random_tasks[i])          
+                            }
+                        }
+                        var si = $interval(function() {
+                            if (index == new_arr.length - 1) {                             
+                                $interval.cancel(si)
+                            } 
+                               callback(tasks)
+                                tasks.push(new_arr[index])
+                                 index ++
+                            }, 30000)
+                    },
+                    validate_string : function(str) {
+                        var regex = /[A-Za-z][a-z0-9!#$%^&!]*[a-z0-9!#$%^&\s]*/g
+                        return str.match(regex) ? true : false
+                    },
+                    match_strings : function(str1, str2) {
+                        var new1 = ''
+                        var new2 = ''
+                          var arr1 = str1.split("")
+                            var arr2 = str2.split("")
+                             for (var i in arr1) {
+                                if (!(arr1[i].match(/\s/)))
+                                  new1 += arr1[i].toLowerCase()
+                              }
+                              for (var j in arr2) {
+                                if (!(arr2[j].match(/\s/)))
+                                  new2 += arr2[j].toLowerCase()
+                              }
+                        return new1 === new2 ? true : false
+                    }
+                }
+            })
+        .controller("ToDoController", ["$scope", "toDoService", function($scope, toDoService) {
+            
+            $scope.error = null
+            $scope.completed = []
+            $scope.taskname = ''
+
+            $scope.$watch(function() {
+                return toDoService.getTasks()
+            }, function(nv, ov) {
+                if (nv != null) $scope.tasks = nv
+            })
+            
+            toDoService.add_random_tasks(function(t) {
+                $scope.tasks = t
+            })
+
+            $scope.change = function(index, start, end) {
+                return toDoService.change(index, start, end)
+            }
+            
+            $scope.add_task = function(evt) {
+                toDoService.addTask($scope.newtask, function(err, t) {
+                    if (!err) { 
+                        $scope.newtask = ''
+                          $scope.tasks = t
+                    } else {
+                        $scope.error = err.message
+                          return false
+                    }
+                })
+            }
+        }])
+        .directive('inpt', function($timeout) {
+            return {
+                restrict : 'AE',
+                link : function(scope, element, attrs) {
+                      var str = ''
+                    element.bind('keyup', function(e) {
+                        str = e.target.value
+                        if (!scope.validate_string(str)) {
+                            scope.error = 'Use only letter for first character'
+                            $timeout(function() {
+                                scope.newtask = ''
+                            })
+                        } else {
+                            $timeout(function() {
+                                scope.error = ''
+                            })
+                        }
+                    })
+                },
+                controller : function($scope, toDoService) {
+                    $scope.validate_string = function(str) {
+                        return toDoService.validate_string(str)
+                    }
+                }
+            }    
+        })
+        .directive('btnPlus', function() {
+            return {
+                restrict: 'AEC',
+                link : function(scope, element, attrs) {
+                    element.bind("mouseover", function(e) {
+                        e.stopPropagation()
+                        $(this).children('.plus_sign').css({
+                            transform: 'rotate(90deg)',
+                            transition: '1s'
+                        })
+                    })
+                    element.bind("mouseout", function(e) {
+                        e.stopPropagation()
+                        $(this).children('.plus_sign').css({
+                            transform: 'rotate(-90deg)',
+                            transition: '1s'
+                        })
+                    })
+                }
+            }
+        })
+
+    </script>
+
+</body>
+  
+</html>
