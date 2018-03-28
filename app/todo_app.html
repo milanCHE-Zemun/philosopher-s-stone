@@ -1,0 +1,79 @@
+<!Doctype HTML>
+
+<html ng-app="littleToDoApp">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="description" content="Little To-Do App">
+    <meta name="author" content="milanCHE">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+     <title>Tasks App</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/angular.js/1.6.5/angular.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <link href="https://fonts.googleapis.com/css?family=Oswald" rel="stylesheet"> 
+    <link href="https://fonts.googleapis.com/css?family=Alegreya" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css?family=Mukta+Mahee" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css?family=Itim", rel="stylesheet">
+    <link rel="stylesheet" type="text/css" href="./styles.css">
+
+    <script src="./app.js"></script>
+    <script src="./controllers.js"></script>
+    <script src="./directives.js"></script>
+    <script src="./services.js"></script>
+
+</head>
+
+<body ng-controller="ToDoController">
+        <div class="to_do">
+            <div id="toolbar">
+                <div id="app_name">
+                    <h3>Little TO-DO Application</h3>
+                </div>
+                <div id="completed_tasks_label">
+                     <h3>Completed tasks ({{ completed.length }})</h3>
+                </div> 
+                <div id="active_tasks_label">
+                    <h3>Active tasks ({{ tasks.length }})</h3>
+                </div>
+            </div>
+            
+            <div id="tasks_at_hand">
+                <div id="task_list_complete">
+                    <div ng-show="completed.length">
+                        <div ng-repeat="task in completed">
+                            <input class="tasks_completed_checked" type="checkbox" ng-click="change($index, completed, tasks)" checked />
+                                <span class="completed_tasks_txt">{{ task }}</span><br />
+                        </div>
+                    </div>
+                </div>
+            
+                <div id="task_list_active">
+                    <span ng-hide="tasks.length" style="font: bold italic 26px/26px Gothic, serif">There are no tasks at the moment</span>
+                        <div ng-repeat="task in tasks">
+                            <input type="checkbox" class="tasks_active_checked" ng-click="change($index, tasks, completed)" />
+                                <span class="active_tasks_txt">{{ task }}</span> <br />
+                        </div>
+                </div>
+            </div>
+    
+            <div id="new_task">
+                
+                <div class="inputs">
+                    <div style="float: left";>
+                        <table>
+                            <tr>
+                                 <td><input id="new_task_inpt" inpt type="text" name="new_task" ng-model="newtask" placeholder="add new task"></td>
+                                 <td><button btn-plus class="new_task_btn" type="submit" ng-click="add_task($event)"><div class="plus_sign">+</div></button></td>
+                            </tr>
+                        </table>
+                        <span ng-show="error" style="width: 100%;font: bold normal 32px/28px Gothic, serif; color:red;">{{ error }}</span>
+                    </div>
+                </div>
+            </div>
+    
+        </div>
+    <div id="clear"></div>  
+
+</body>
+      
+</html>
